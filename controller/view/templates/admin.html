@@ -1,0 +1,74 @@
+{% extends "index.html" %}
+{% block content %}
+    <div class="container">
+        <table id="grid-data" class="table table-condensed table-hover table-striped">
+            <thead>
+                <tr>
+                    <th data-column-id="phone" data-type="numeric" data-identifier="true">Mobile Phone</th>
+                    <th data-column-id="name" data-identifier="true">Name</th>
+                    <th data-column-id="quantity" data-order="desc" data-identifier="true">Quantity</th>
+                    <th data-column-id="commands" data-type="numeric" data-identifier="true" data-formatter="commands" data-sortable="false">Commands</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+ {% endblock %}
+{% block script %}
+ <script>
+$(function() {
+
+  var planningFilter = function () {
+
+      $("#grid-data").bootgrid("destroy");
+      var grid =  $("#grid-data").bootgrid({
+                    ajax: true,
+                    navigation: 3,
+                    css:{
+                     pagination: 'pagination pagination-lg',
+                     paginationButton: 'btn-primary btn-lg'
+                    },
+                    post: function ()
+                    {
+                        return {
+                            id: "b0df282a-0d67-40e5-8558-c9e93b7befed"
+                        };
+                    },
+                     ajaxSettings: {
+                            method: "POST",
+                            cache: false
+                        },
+                    url: "api/admin/orders",
+                    formatters: {
+                        "commands": function(column, row)
+                        {
+                            return "<button type=\"button\" class=\"btn btn-xs btn-default command-edit\" data-row-id=\"" + row.phone + "\"><span class=\"fa fa-pencil\"></span></button> " +
+                                "<button type=\"button\" class=\"btn btn-xs btn-default command-delete\" data-row-id=\"" + row.phone + "\"><span class=\"fa fa-trash-o\"></span></button>";
+                        }
+                    }
+                }).on("loaded.rs.jquery.bootgrid", function()
+                {
+
+                    grid.find(".command-edit").on("click", function(e)
+                    {
+                        alert("You pressed edit on row: " + $(this).data("row-id"));
+                    }).end().find(".command-delete").on("click", function(e)
+                    {
+                        var phone=$(this).data("row-id");
+                        $.ajax({
+                            url:'api/admin/deleteorder',
+                            method:'DELETE',
+                            data:{'phone':phone},
+                            dataType:"json",
+                            success:function(data){
+                            planningFilter();
+                            }
+                        });
+
+                    });
+                });
+  }
+
+  planningFilter();
+});
+</script>
+{% endblock %}
